@@ -1,15 +1,20 @@
 package com.zzy.analyzeapk;
 
+import org.json.JSONObject;
 import soot.*;
 import soot.util.Chain;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 public class DetectCordovaFunction {
-    public static void findCordovaFunctions(Chain<SootClass> cs) {
+    public static void findCordovaFunctions(Chain<SootClass> cs, JSONObject obj) throws IOException {
         for(SootClass c : cs) {
             List<SootMethod> ms = c.getMethods();
             //Chain<SootField> fs = c.getFields();
@@ -35,19 +40,25 @@ public class DetectCordovaFunction {
                     }
                 }
                 if (judgeXmlParse.size() >= 3) {
-                    System.out.println("Found a Whitelist method: CustomConfigXmlParser");
-                    System.out.println("Exist in the class: " + c.getName());
-                    System.out.println("Method name is: " + m.getSignature() + "\n");
+                    JSONObject subobj = new JSONObject();
+                    subobj.put("name", "CustomConfigXmlParser");
+                    subobj.put("location", c.getName());
+                    subobj.put("signature", m.getSignature());
+                    obj.accumulate("Whitelist method", subobj);
                 }
                 if (judgeaddWhiteListEntry.size() == 1) {
-                    System.out.println("Found a Whitelist method: addWhiteListEntry");
-                    System.out.println("Exist in the class: " + c.getName());
-                    System.out.println("Method name is: " + m.getSignature() + "\n");
+                    JSONObject subobj = new JSONObject();
+                    subobj.put("name", "addWhiteListEntry");
+                    subobj.put("location", c.getName());
+                    subobj.put("signature", m.getSignature());
+                    obj.accumulate("Whitelist method", subobj);
                 }
                 if (judgeisUrlWhiteListed.size() == 3) {
-                    System.out.println("Found a Whitelist method: isUrlWhiteListed");
-                    System.out.println("Exist in the class: " + c.getName());
-                    System.out.println("Method name is: " + m.getSignature() + "\n");
+                    JSONObject subobj = new JSONObject();
+                    subobj.put("name", "isUrlWhiteListed");
+                    subobj.put("location", c.getName());
+                    subobj.put("signature", m.getSignature());
+                    obj.accumulate("Whitelist method", subobj);
                 }
             }
         }

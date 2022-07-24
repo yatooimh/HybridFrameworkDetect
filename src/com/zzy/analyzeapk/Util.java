@@ -1,19 +1,24 @@
 package com.zzy.analyzeapk;
 
+import netscape.javascript.JSObject;
+import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParserException;
 import soot.*;
 import soot.options.Options;
 import soot.util.Chain;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Map;
 import java.util.Vector;
 
 public class Util {
-    static int fileindex = 0;
-    static String apkPath = "D:\\FDU\\laboratory\\labs-master\\soot\\apks\\testapk";
-    public static Vector<String> file_vector =  new Vector<String>();
+    public static int fileindex = 0;
+    public static String apkDir = "D:\\FDU\\laboratory\\labs-master\\soot\\apks\\testapk";
+    public static Vector<String> file_vector = new Vector<>();
+    public static JSONObject jsonoutcome = new JSONObject();
 
     public static void setSootConfig() {
         Options.v().set_src_prec(Options.src_prec_apk);
@@ -26,7 +31,7 @@ public class Util {
                     protected void internalTransform(String arg0, Map<String, String> arg1) {
                         Chain<SootClass> cs = Scene.v().getClasses();
                         try {
-                            DetectFramework.detectwhich(cs, apkPath+ File.separator+file_vector.get(fileindex));
+                            DetectFramework.detectwhich(cs, file_vector.get(fileindex));
                         } catch (XmlPullParserException | IOException e) {
                             e.printStackTrace();
                         }
@@ -35,21 +40,27 @@ public class Util {
         );
     }
 
-    public static void main(String[] args) {
-        file_vector = DetectFiles.getfile(apkPath);//"-soot-class-path" "C:\\Users\\97896\\AppData\\Local\\Android\\android-sdk\\platforms" "D:\\SDK\\platforms"
+    public static void main(String[] args) throws IOException {
+        File outcomefile = new File(apkDir + "\\outcome.json");
+        file_vector = DetectFiles.getfile(apkDir);//"-soot-class-path" "C:\\Users\\97896\\AppData\\Local\\Android\\android-sdk\\platforms" "D:\\SDK\\platforms"
         for(fileindex=0;fileindex<file_vector.size();fileindex++) {
             setSootConfig();
-            System.out.println("Analyzing " + file_vector.get(fileindex) + "\n");
+            System.out.println("Analyzing " + file_vector.get(fileindex));
             soot.Main.main(new String[]{
                 "-w",
                 "-f", "J",
                 "-p", "wjtp.myanalysis", "enabled:true",
                 "-allow-phantom-refs",
                 "-pp",
-                "-process-dir", apkPath+ File.separator+file_vector.get(fileindex),
+                "-process-dir", apkDir+ File.separator+file_vector.get(fileindex),
                 "-process-multiple-dex"
             });
             G.reset();
         }
+        FileWriter fw = new FileWriter(outcomefile);
+        PrintWriter out = new PrintWriter(fw);
+        out.write(jsonoutcome.toString());
+        fw.close();
+        out.close();
     }
 }

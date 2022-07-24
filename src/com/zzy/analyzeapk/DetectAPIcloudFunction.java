@@ -1,15 +1,21 @@
 package com.zzy.analyzeapk;
 
+import org.json.JSONObject;
 import soot.*;
 import soot.util.Chain;
+import sun.plugin.javascript.JSClassLoader;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 public class DetectAPIcloudFunction {
-    public static void findAPIcloudFunctions(Chain<SootClass> cs) {
+    public static void findAPIcloudFunctions(Chain<SootClass> cs, JSONObject obj) throws IOException {
         for(SootClass c : cs) {
             List<SootMethod> ms = c.getMethods();
             //Chain<SootField> fs = c.getFields();
@@ -30,14 +36,18 @@ public class DetectAPIcloudFunction {
                     }
                 }
                 if (addWhiteListEntry.size() == 1) {
-                    System.out.println("Found a Whitelist method: addWhiteListEntry");
-                    System.out.println("Exist in the class: " + c.getName());
-                    System.out.println("Method name is: " + m.getSignature() + "\n");
+                    JSONObject subobj = new JSONObject();
+                    subobj.put("name", "addWhiteListEntry");
+                    subobj.put("location", c.getName());
+                    subobj.put("signature", m.getSignature());
+                    obj.accumulate("Whitelist method", subobj);
                 }
                 if (judgeisUrlWhiteListed.size() == 4) {
-                    System.out.println("Found a Whitelist method: isUrlWhiteListed");
-                    System.out.println("Exist in the class: " + c.getName());
-                    System.out.println("Method name is: " + m.getSignature() + "\n");
+                    JSONObject subobj = new JSONObject();
+                    subobj.put("name", "isUrlWhiteListed");
+                    subobj.put("location", c.getName());
+                    subobj.put("signature", m.getSignature());
+                    obj.accumulate("Whitelist method", subobj);
                 }
             }
         }
