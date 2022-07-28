@@ -22,7 +22,7 @@ public class Util {
 
     public static void setSootConfig() {
         Options.v().set_src_prec(Options.src_prec_apk);
-        Options.v().set_output_format(Options.output_format_jimple);
+        //Options.v().set_output_format(Options.output_format_jimple);
         Options.v().set_soot_classpath("C:\\Program Files\\Java\\jdk1.8.0_271\\jre\\lib\\rt.jar;C:\\Program Files\\Java\\jdk1.8.0_271\\jre\\lib\\jce.jar;D:\\FDU\\laboratory\\labs-master\\soot\\sootclasses-trunk-jar-with-dependencies.jar");
         Options.v().set_android_jars("D:\\SDK\\platforms");
         PackManager.v().getPack("wjtp").add(
@@ -48,7 +48,7 @@ public class Util {
             System.out.println("Analyzing " + file_vector.get(fileindex));
             soot.Main.main(new String[]{
                 "-w",
-                "-f", "J",
+                "-f", "n",
                 "-p", "wjtp.myanalysis", "enabled:true",
                 "-allow-phantom-refs",
                 "-pp",
