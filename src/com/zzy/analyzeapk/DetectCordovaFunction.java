@@ -4,17 +4,14 @@ import org.json.JSONObject;
 import soot.*;
 import soot.util.Chain;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 public class DetectCordovaFunction {
-    public static void findCordovaFunctions(Chain<SootClass> cs, JSONObject obj) throws IOException {
+    public static void findCordovaFunctions(Chain<SootClass> cs, JSONObject obj) {
         for(SootClass c : cs) {
             List<SootMethod> ms = c.getMethods();
             //Chain<SootField> fs = c.getFields();
@@ -31,12 +28,25 @@ public class DetectCordovaFunction {
                         if (u.toString().contains("allow-intent")) judgeXmlParse.add("allow-intent");
                         if (u.toString().contains("Failed to add origin"))
                             judgeaddWhiteListEntry.add("Failed to add origin");
-                        if (u.toString().contains("if $z0 == 0 goto $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>()"))
-                            judgeisUrlWhiteListed.add("hasNext");
-                        if(u.toString().contains("$r2 = r0.<org.apache.cordova.Whitelist: java.util.ArrayList whiteList>"))
-                            judgeisUrlWhiteListed.add("ArrayList");
-                        if(u.toString().contains("if $r2 != null goto $r3 = staticinvoke <android.net.Uri: android.net.Uri parse(java.lang.String)>($r1)"))
-                            judgeisUrlWhiteListed.add("parse");
+                        int parseflag = 0, hasNextflag = 0, matchflag = 0;
+                        for(ValueBox box: u.getUseAndDefBoxes())
+                        {
+                            if(box.toString().contains("LinkedVariableBox")) parseflag++;
+                            if(box.toString().contains("LinkedRValueBox(staticinvoke <android.net.Uri: android.net.Uri parse(java.lang.String)>")) parseflag++;
+                            if(box.toString().contains("ImmediateBox")) parseflag++;
+
+                            if(box.toString().contains("LinkedVariableBox")) hasNextflag++;
+                            if(box.toString().contains("LinkedRValueBox(interfaceinvoke") && box.toString().contains("<java.util.Iterator: boolean hasNext()>")) hasNextflag++;
+                            if(box.toString().contains("JimpleLocalBox")) hasNextflag++;
+
+                            if(box.toString().contains("LinkedVariableBox")) matchflag++;
+                            if(box.toString().contains("LinkedRValueBox") && box.toString().contains("boolean") && box.toString().contains("android.net.Uri")) matchflag++;
+                            if(box.toString().contains("ImmediateBox")) matchflag++;
+                            if(box.toString().contains("JimpleLocalBox")) matchflag++;
+                        }
+                        if(parseflag == 3) judgeisUrlWhiteListed.add("parse");
+                        if(hasNextflag == 3) judgeisUrlWhiteListed.add("hasNext");
+                        if(matchflag == 3) judgeisUrlWhiteListed.add("ArrayList");
                     }
                 }
                 if (judgeXmlParse.size() >= 3) {
