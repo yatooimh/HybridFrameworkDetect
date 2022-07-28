@@ -4,7 +4,6 @@ import org.json.JSONObject;
 import soot.*;
 import soot.util.Chain;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -17,7 +16,6 @@ public class DetectCordovaFunction {
             //Chain<SootField> fs = c.getFields();
             for (SootMethod m : ms) {
                 Set<String> judgeXmlParse = new HashSet<>(), judgeaddWhiteListEntry = new HashSet<>(), judgeisUrlWhiteListed = new HashSet<>();
-                Set<String> parseflag = new HashSet<>(), hasNextflag = new HashSet<>(), matchflag = new HashSet<>();
                 if (m.hasActiveBody()) {
                     Body b = m.getActiveBody();
                     final PatchingChain<Unit> units = b.getUnits();
@@ -29,25 +27,31 @@ public class DetectCordovaFunction {
                         if (u.toString().contains("allow-intent")) judgeXmlParse.add("allow-intent");
                         if (u.toString().contains("Failed to add origin"))
                             judgeaddWhiteListEntry.add("Failed to add origin");
-
+                        Set<String> parseflag = new HashSet<>(), hasNextflag = new HashSet<>(), matchflag = new HashSet<>();
                         for(ValueBox box: u.getUseAndDefBoxes())
                         {
-                            if(box.toString().contains("LinkedVariableBox")) parseflag.add("LinkedVariableBox");
-                            if(box.toString().contains("LinkedRValueBox(staticinvoke <android.net.Uri: android.net.Uri parse(java.lang.String)>")) parseflag.add("LinkedRValueBox");
-                            if(box.toString().contains("ImmediateBox")) parseflag.add("ImmediateBox");
+                            if(u.getUseAndDefBoxes().size() == 3) {
+                                if (box.toString().contains("LinkedVariableBox")) parseflag.add("LinkedVariableBox");
+                                if (box.toString().contains("LinkedRValueBox(staticinvoke <android.net.Uri: android.net.Uri parse(java.lang.String)>"))
+                                    parseflag.add("LinkedRValueBox");
+                                if (box.toString().contains("ImmediateBox")) parseflag.add("ImmediateBox");
 
-                            if(box.toString().contains("LinkedVariableBox")) hasNextflag.add("LinkedVariableBox");
-                            if(box.toString().contains("LinkedRValueBox(interfaceinvoke") && box.toString().contains("<java.util.Iterator: boolean hasNext()>")) hasNextflag.add("LinkedRValueBox");
-                            if(box.toString().contains("JimpleLocalBox")) hasNextflag.add("JimpleLocalBox");
-
-                            if(box.toString().contains("LinkedVariableBox")) matchflag.add("LinkedVariableBox");
-                            if(box.toString().contains("LinkedRValueBox") && box.toString().contains("boolean") && box.toString().contains("android.net.Uri")) matchflag.add("LinkedRValueBox");
-                            if(box.toString().contains("ImmediateBox")) matchflag.add("ImmediateBox");
-                            if(box.toString().contains("JimpleLocalBox")) matchflag.add("JimpleLocalBox");
+                                if (box.toString().contains("LinkedVariableBox")) hasNextflag.add("LinkedVariableBox");
+                                if (box.toString().contains("LinkedRValueBox(interfaceinvoke") && box.toString().contains("<java.util.Iterator: boolean hasNext()>"))
+                                    hasNextflag.add("LinkedRValueBox");
+                                if (box.toString().contains("JimpleLocalBox")) hasNextflag.add("JimpleLocalBox");
+                            }
+                            if(u.getUseAndDefBoxes().size() == 4) {
+                                if (box.toString().contains("LinkedVariableBox")) matchflag.add("LinkedVariableBox");
+                                if (box.toString().contains("LinkedRValueBox") && box.toString().contains("boolean") && box.toString().contains("android.net.Uri"))
+                                    matchflag.add("LinkedRValueBox");
+                                if (box.toString().contains("ImmediateBox")) matchflag.add("ImmediateBox");
+                                if (box.toString().contains("JimpleLocalBox")) matchflag.add("JimpleLocalBox");
+                            }
                         }
                         if(parseflag.size() == 3) judgeisUrlWhiteListed.add("parse");
                         if(hasNextflag.size() == 3) judgeisUrlWhiteListed.add("hasNext");
-                        if(matchflag.size() == 3) judgeisUrlWhiteListed.add("ArrayList");
+                        if(matchflag.size() == 4) judgeisUrlWhiteListed.add("ArrayList");
                     }
                 }
                 if (judgeXmlParse.size() >= 3) {

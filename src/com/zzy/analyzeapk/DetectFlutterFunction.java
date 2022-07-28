@@ -4,17 +4,13 @@ import org.json.JSONObject;
 import soot.*;
 import soot.util.Chain;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 public class DetectFlutterFunction {
-    public static void findFlutterFunctions(Chain<SootClass> cs, JSONObject obj) throws IOException {
+    public static void findFlutterFunctions(Chain<SootClass> cs, JSONObject obj) {
         for(SootClass c : cs) {
             List<SootMethod> ms = c.getMethods();
             //Chain<SootField> fs = c.getFields();

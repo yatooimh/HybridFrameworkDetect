@@ -1,18 +1,12 @@
 package com.zzy.analyzeapk;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.*;
 
-import com.sun.xml.internal.ws.util.UtilException;
 import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParserException;
 import soot.*;
-import soot.jimple.AbstractStmtSwitch;
-import soot.jimple.InvokeStmt;
-import soot.options.Options;
 import soot.util.Chain;
 
 public class DetectFramework {
@@ -21,7 +15,7 @@ public class DetectFramework {
     public static void detectwhich(Chain<SootClass> cs, String apkName) throws XmlPullParserException, IOException {
         boolean detectframework = false;
         String targetframework = "";
-        String outcomeFromManifest = ManifestChecker.SearchManifest(Util.apkDir + File.separator + apkName);
+        String outcomeFromManifest = ManifestChecker.SearchManifest(Util.rootDir + File.separator + Util.directory_vector.get(Util.directoryindex) + File.separator + apkName);
         if(!outcomeFromManifest.equals(""))
         {
             detectframework = true;
@@ -47,7 +41,7 @@ public class DetectFramework {
         }
     }
 
-    public static void detectFunctions(String targetframework, Chain<SootClass> cs, JSONObject obj) throws IOException {
+    public static void detectFunctions(String targetframework, Chain<SootClass> cs, JSONObject obj) {
         if(Objects.equals(targetframework, ""))
             return ;
         if(Objects.equals(targetframework, "cordova"))
