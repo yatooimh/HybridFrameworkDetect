@@ -16,7 +16,7 @@ import java.util.Vector;
 public class Util {
     public static int directoryindex = 0;
     public static int fileindex = 0;
-    public static String rootDir = "D:\\FDU\\laboratory\\labs-master\\soot\\apks\\testapk";// "/home/miniprogram/r6010/download_apks"
+    public static String rootDir = "/home/miniprogram/r6010/download_apks";//  "D:\\FDU\\laboratory\\labs-master\\soot\\apks\\testapk"
     public static Vector<String> directory_vector = new Vector<>();
     public static Vector<String> file_vector = new Vector<>();
     public static JSONObject jsonoutcome = new JSONObject();
@@ -24,12 +24,10 @@ public class Util {
     public static void setSootConfig() {
         Options.v().set_src_prec(Options.src_prec_apk);
         //Options.v().set_output_format(Options.output_format_jimple);
-        /*
-        Options.v().set_soot_classpath("/home/mnp2/zzy/dependencies/rt.jar;/home/mnp2/zzy/dependencies/jce.jar;/home/mnp2/zzy/dependencies/sootclasses-trunk-jar-with-dependencies.jar");
-        Options.v().set_android_jars("/home/mnp2/zzy/dependencies/platforms");
-        */
-        Options.v().set_soot_classpath("C:\\Program Files\\Java\\jdk1.8.0_271\\jre\\lib\\rt.jar;C:\\Program Files\\Java\\jdk1.8.0_271\\jre\\lib\\jce.jar;D:\\FDU\\laboratory\\labs-master\\soot\\sootclasses-trunk-jar-with-dependencies.jar");
-        Options.v().set_android_jars("D:\\SDK\\platforms");
+        Options.v().set_soot_classpath("rt.jar");
+        Options.v().set_soot_classpath("jce.jar");
+        Options.v().set_soot_classpath("sootclasses-trunk-jar-with-dependencies.jar");
+        Options.v().set_android_jars("platforms");
         PackManager.v().getPack("wjtp").add(
                 new Transform("wjtp.myanalysis", new SceneTransformer() {
                     @Override
@@ -46,7 +44,7 @@ public class Util {
     }
 
     public static void main(String[] args) throws IOException {
-        File outcomefile = new File("outcome.json");
+        File outcomefile = new File("/home/mnp2/zzy/outcome.json");
         //File outcomefile = new File(apkDir + "\\outcome.json");
         directory_vector = DetectFiles.getDirectory(rootDir);
         for(directoryindex = 0; directoryindex < directory_vector.size(); directoryindex++) {
@@ -54,17 +52,25 @@ public class Util {
             file_vector = DetectFiles.getfile(apkDir);//  "D:\\SDK\\platforms"
             for (fileindex = 0; fileindex < file_vector.size(); fileindex++) {
                 setSootConfig();
-                System.out.println("Analyzing " + file_vector.get(fileindex));
-                soot.Main.main(new String[]{
-                        "-w",
-                        "-f", "n",
-                        "-p", "wjtp.myanalysis", "enabled:true",
-                        "-allow-phantom-refs",
-                        "-pp",
-                        "-process-dir", apkDir + File.separator + file_vector.get(fileindex),
-                        "-process-multiple-dex"
-                });
-                G.reset();
+                System.out.println("Analyzing " + file_vector.get(fileindex) + " located in " + directory_vector.get(directoryindex));
+                try {
+                    soot.Main.main(new String[]{
+                            "-w",
+                            "-f", "n",
+                            "-p", "wjtp.myanalysis", "enabled:true",
+                            "-allow-phantom-refs",
+                            "-pp",
+                            "-process-dir", apkDir + File.separator + file_vector.get(fileindex),
+                            "-process-multiple-dex"
+                    });
+                } catch (Exception e) {
+                    System.out.println("Found an error in "+directory_vector.get(directoryindex));
+                    System.out.println("located in "+file_vector.get(fileindex));
+                    e.printStackTrace();
+                }
+                finally {
+                    G.reset();
+                }
             }
         }
         FileWriter fw = new FileWriter(outcomefile);

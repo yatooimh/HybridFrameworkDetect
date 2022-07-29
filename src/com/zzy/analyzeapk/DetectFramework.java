@@ -35,7 +35,7 @@ public class DetectFramework {
         if(detectframework) {
             JSONObject subobj = new JSONObject();
             subobj.put("framework", targetframework);
-            //System.out.println("\n" + targetframework + " framework detected." + "\n");
+            System.out.println(targetframework + " framework detected." + "\n");
             detectFunctions(targetframework, cs, subobj);
             Util.jsonoutcome.accumulate(apkName, subobj);
         }
